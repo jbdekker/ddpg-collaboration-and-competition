@@ -56,7 +56,7 @@ The core of the code in this repository is based on the [ddpg-bipedal](https://g
 
 Deep Deterministic Policy Gradient (DDPG) is a model-free off-policy algorithm for learning continous actions. It combines ideas from DPG (Deterministic Policy Gradient) and DQN (Deep Q-Network). It uses Experience Replay and slow-learning target networks from DQN, and it is based on DPG, which can operate over continuous action spaces. [[ref]](https://keras.io/examples/rl/ddpg_pendulum/)
 
-The DRLND DDPG code was already written to utilize only a single agent, so the changes had to be made to make it work in a collaborative environment. Experience from the 2nd project helped a lot.
+The DRLND DDPG code was written to utilize only a single agent, so changes had to be made to make it work in a collaborative environment. Experience from the 2nd project helped a lot.
 
 ### Implementation details
 
