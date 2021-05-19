@@ -1,61 +1,70 @@
-# Continuous Control using DDPG - Project Report
+# Collaboration and Competition using DDPG - Project Report
 
 ### Implementation
 
 ## The Environment
 
-This project is built around the [Reacher](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#reacher) environment.
+This project is built around the [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment.
 
 ![Trained Agent](models/test.gif)
 
-In this environment, a double-jointed arm can move to target locations. A reward of **+0.1** is provided for each step that the agent's hand is in the goal location. Thus, the goal of your agent is to maintain its position at the target location for as many time steps as possible. The environment is considered solved when the agent achieves an average score of at least **30** over **100** episodes. 
+In this environment, two agents control rackets to bounce a ball over a net. If an agent hits the ball over the net, it receives a reward of **+0.1**.  If an agent lets a ball hit the ground or hits the ball out of bounds, it receives a reward of **-0.01**.  Thus, the goal of each agent is to keep the ball in play.
 
-We've trained a DDPG agent to solve the single agent (episodic) environment.
+The task is episodic, and in order to solve the environment, your agents must get an average score of **+0.5** (over **100** consecutive episodes, after taking the maximum over both agents). Specifically,
+
+- After each episode, we add up the rewards that each agent received (without discounting), to get a score for each agent. This yields 2 (potentially different) scores. We then take the maximum of these 2 scores.
+- This yields a single **score** for each episode.
+
+The environment is considered solved, when the average (over 100 episodes) of those **scores** is at least **+0.5**.
+
+We've trained a DDPG agent to solve the double-agent (episodic) environment.
 
 ### State/observation space
 
-The observation space consists of **33** variables corresponding to position, rotation, velocity, and angular velocities of the arm. 
+The observation space consists of **8** variables corresponding to the position and velocity of the ball and racket. 
 
 ### Action space
 
-Each action is a vector with four numbers, corresponding to torque applicable to two joints. Every entry in the action vector should be a number between **-1** and **1**.
+Each agent receives its own, local observation.  Two continuous actions are available, corresponding to movement toward (or away from) the net, and jumping. 
 
 ## Baseline - (random) agent
 
 A random agent was provided to both test the environment and to set the baseline
 
 ```python
-env_info = env.reset(train_mode=False)[brain_name]     # reset the environment    
-states = env_info.vector_observations                  # get the current state (for each agent)
-scores = np.zeros(num_agents)                          # initialize the score (for each agent)
-while True:
-    actions = np.random.randn(num_agents, action_size) # select an action (for each agent)
-    actions = np.clip(actions, -1, 1)                  # all actions between -1 and 1
-    env_info = env.step(actions)[brain_name]           # send all actions to tne environment
-    next_states = env_info.vector_observations         # get next state (for each agent)
-    rewards = env_info.rewards                         # get reward (for each agent)
-    dones = env_info.local_done                        # see if episode finished
-    scores += env_info.rewards                         # update the score (for each agent)
-    states = next_states                               # roll over states to next time step
-    if np.any(dones):                                  # exit loop if episode finished
-        break
-
-print('Total score (averaged over agents) this episode: {}'.format(np.mean(scores)))
+for i in range(1, 6):                                      # play game for 5 episodes
+    env_info = env.reset(train_mode=False)[brain_name]     # reset the environment    
+    states = env_info.vector_observations                  # get the current state (for each agent)
+    scores = np.zeros(num_agents)                          # initialize the score (for each agent)
+    while True:
+        actions = np.random.randn(num_agents, action_size) # select an action (for each agent)
+        actions = np.clip(actions, -1, 1)                  # all actions between -1 and 1
+        env_info = env.step(actions)[brain_name]           # send all actions to tne environment
+        next_states = env_info.vector_observations         # get next state (for each agent)
+        rewards = env_info.rewards                         # get reward (for each agent)
+        dones = env_info.local_done                        # see if episode finished
+        scores += env_info.rewards                         # update the score (for each agent)
+        states = next_states                               # roll over states to next time step
+        if np.any(dones):                                  # exit loop if episode finished
+            break
+    print('Score (max over agents) from episode {}: {}'.format(i, np.max(scores)))
 ```
 
-As expected, the random agent's score averages around ``0``. To achive the **>=30** score, we need something better than a random walk.
+As expected, the random agent's score averages around ``0``. To achive the **>=0.5** score, we need something better than a random walk.
 
 ## DDPG-agent implementation
 
-The core of the code in this repository is based on the [ddpg-bipedal](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal) and [ddpg-pendulum](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-pendulum) agents. Some ammendments were made in order to make it work with the Reacher environment.
+The core of the code in this repository is based on the [ddpg-bipedal](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-bipedal) and [ddpg-pendulum](https://github.com/udacity/deep-reinforcement-learning/tree/master/ddpg-pendulum) agents. Some ammendments were made in order to make it work with the multi-agent Tennis environment.
 
 Deep Deterministic Policy Gradient (DDPG) is a model-free off-policy algorithm for learning continous actions. It combines ideas from DPG (Deterministic Policy Gradient) and DQN (Deep Q-Network). It uses Experience Replay and slow-learning target networks from DQN, and it is based on DPG, which can operate over continuous action spaces. [[ref]](https://keras.io/examples/rl/ddpg_pendulum/)
 
-The DRLND DDPG code was already written to utilize only a single agent, so the required functional changes were minimal. It did however take some trial & error to get the agent to interact with the Reacher environment. The first attemts failed not due to the DDPG algorithm, but due to implementation errors...
+The DRLND DDPG code was already written to utilize only a single agent, so the changes had to be made to make it work in a collaborative environment. Experience from the 2nd project helped a lot.
 
 ### Implementation details
 
-1. Actor network -  [[link]](https://github.com/jbdekker/ddpg-continuous-control/blob/27cb4e9595c02ad36538bb486cdbd831d7e3f4db/src/model.py#L14-L47)
+The implementation / architecture of the DDPG agent is identical to the one developed for project #2:
+
+1. Actor network - [[link]](https://github.com/jbdekker/ddpg-continuous-control/blob/27cb4e9595c02ad36538bb486cdbd831d7e3f4db/src/model.py#L14-L47)
 
     Multilayer (2-layer) perceptron model (128, 128) with batch normalisation, relu activation for the hidden layers and tanh activation on the output layer (output should be [-1, 1]).
 
@@ -88,8 +97,6 @@ The DRLND DDPG code was already written to utilize only a single agent, so the r
         LR_ACTOR = 1e-4         # learning rate of the actor
         LR_CRITIC = 1e-4        # learning rate of the critic
         WEIGHT_DECAY = 0        # L2 weight decay
-        UPDATE_EVERY = 1        # Update every x steps
-        UPDATE_N_TIMES = 1      # Update every x steps
     ```
 
     Note: No extensive grid search was performed to optimize the hyperparameters. A naive manual search (small permutations) showed no significant improvement.
@@ -101,7 +108,7 @@ Final trained agent models:
 -   [scores np.save file](models/scores.npy)
 -   [scores plot](models/scores.png)
 
-The DDPG with experience replay (uniform sampling), batch normalisation & gradient clipping was able to consistently solve the environment in 150-250 episodes. The agent whose checkpoint is saved in ``models`` was able to solve the environment in 2009 episodes. A plot of the cumulative rewards (score) per training episode is shown below:
+The DDPG with experience replay (uniform sampling), batch normalisation & gradient clipping was able to consistently solve the environment in 1600-1800 episodes. The agent whose checkpoint is saved in ``models`` was able to solve the environment in **1719** episodes. A plot of the cumulative rewards (score) per training episode is shown below. It is clear that the training itself is very unstable & quite slow. The variance for the trained agent is very large, also the performance after **~1737** episodes drops donw a bit and settles @ around **+0.25**. 
 
 ![Training progress](models/scores.png)
 

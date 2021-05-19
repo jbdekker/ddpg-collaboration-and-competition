@@ -28,14 +28,16 @@ agent = Agent(
 )
 
 
-def ddpg(n_episodes=5000):
+def ddpg(n_episodes=3000):
     scores_deque = deque(maxlen=100)
     total_scores = []
+
     best_average_score = 0
     improved = False
     for i_episode in range(1, n_episodes + 1):
         env_info = env.reset(train_mode=True)[brain_name]
         states = env_info.vector_observations
+        actions = agent.act(states)
 
         average_score = 0
         scores = np.zeros(num_agents)
@@ -43,19 +45,26 @@ def ddpg(n_episodes=5000):
 
         agent.reset()
         while True:
-            actions = agent.act(states)
-            env_info = env.step(actions)[brain_name]
+            next_actions = agent.act(states)
+
+            env_info = env.step(next_actions)[brain_name]
 
             rewards = env_info.rewards
             next_states = env_info.vector_observations
             dones = env_info.local_done
 
+            # add a small penalty for moving to promote smooth movements
+            deltas = [np.abs(np.mean(a - b)) for a, b in zip(next_actions, actions)]
+
+            rewards = rewards - 0.001 * deltas
+
             for state, action, reward, next_state, done in zip(
-                states, actions, rewards, next_states, dones
+                states, next_actions, rewards, next_states, dones
             ):
                 agent.step(state, action, reward, next_state, done)
 
             states = next_states
+            actions = next_actions
             scores += rewards
 
             if np.any(dones):
