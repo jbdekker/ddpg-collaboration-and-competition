@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "src"
+version = "0.1.0"
+description = "Project 3 - Deep Reinforcement Learning Nanodegree"
+authors = ["Jordi Dekker"]
+
+[tool.poetry.dependencies]
+python = ">=3.6.2, <3.7.0"
+numpy = "~1.19.1"
+pandas = "1.0.1"
+ipykernel = "^5.5.4"
+unityagents = "^0.4.0"
+torch = "^1.8.1"
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
