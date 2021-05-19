@@ -11,7 +11,7 @@
 
 This project is built around the [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment.
 
-![Trained Agent](https://github.com/jbdekker/ddpg-continuous-control/blob/1f4943e5f9e661ebf8a4c070262771ad538bce1f/models/test.gif)
+![Trained Agent](https://github.com/jbdekker/ddpg-collaboration-and-competition/blob/81a9ed92b32ade847e89f75209bf6953bc04d188/models/test.gif)
 
 In this environment, two agents control rackets to bounce a ball over a net. If an agent hits the ball over the net, it receives a reward of **+0.1**.  If an agent lets a ball hit the ground or hits the ball out of bounds, it receives a reward of **-0.01**.  Thus, the goal of each agent is to keep the ball in play.
 
