@@ -6,7 +6,7 @@
 
 This project is built around the [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment.
 
-![Trained Agent](models/test.gif)
+![Trained Agent](https://github.com/jbdekker/ddpg-collaboration-and-competition/blob/81a9ed92b32ade847e89f75209bf6953bc04d188/models/test.gif)
 
 In this environment, two agents control rackets to bounce a ball over a net. If an agent hits the ball over the net, it receives a reward of **+0.1**.  If an agent lets a ball hit the ground or hits the ball out of bounds, it receives a reward of **-0.01**.  Thus, the goal of each agent is to keep the ball in play.
 
@@ -80,9 +80,6 @@ The implementation / architecture of the DDPG agent is identical to the one deve
 
     Clipping proved to be benificial to the training performance of the model
 
-    Without clipping
-    ![Without clipping](https://github.com/jbdekker/ddpg-continuous-control/blob/3d881f9b7e0fd6576c29e72de214bf90b9e61de0/models/scores_w_batchnorm_wo_gratient_clipping.png)
-
 4. Hyperparameters
 
     A rough manual search of the hyperparameter space was performed. DDPG seemed especially sensitive to learning rate
@@ -108,7 +105,11 @@ Final trained agent models:
 -   [scores np.save file](models/scores.npy)
 -   [scores plot](models/scores.png)
 
-The DDPG with experience replay (uniform sampling), batch normalisation & gradient clipping was able to consistently solve the environment in 1600-1800 episodes. The agent whose checkpoint is saved in ``models`` was able to solve the environment in **1719** episodes. A plot of the cumulative rewards (score) per training episode is shown below. It is clear that the training itself is very unstable & quite slow. The variance for the trained agent is very large, also the performance after **~1737** episodes drops donw a bit and settles @ around **+0.25**. 
+The DDPG with experience replay (uniform sampling), batch normalisation & gradient clipping was able to consistently solve the environment in 1600-1800 episodes. The agent whose checkpoint is saved in ``models`` was able to solve the environment in **1720** episodes. A plot of the cumulative rewards (score) per training episode is shown below. It is clear that the training itself is very unstable & quite slow. The variance for the trained agent is very large, also the performance after **~1737** episodes drops down a bit and settles @ around **+0.25**. 
+
+```bash
+Environment solved in 1720 episodes! Average Score: 0.50
+```
 
 ![Training progress](models/scores.png)
 
@@ -119,5 +120,6 @@ Below a video of the agent in action:
 ## Ideas for future work
 
 1. **Tuning** The hyperparameter choice is somewhat arbitrary as no extensive grid-search was performed. 
-2.  **Prioritized experience replay** In uniform sampling (like what we used), all experiances have the same probability of being sampled. This  We can however assume that some experiences are more valuable than others (most experiences in this environment are not that probably not that important). With prioritized experience replay, the sampling distribution is proportional (or at least a function) of some measure of importance. 
-3.  **Alternative model architectures** Other architectures can be tested (e.g. A3C, policy gradients) that might improve performance
+2. **Reward tuning** The agents behave quite erratic when the ball is not near them. Tuning the reward structure a bit (e.g. penalty on excess movement) might smooth things down a bit.
+3. **Prioritized experience replay** In uniform sampling (like what we used), all experiances have the same probability of being sampled. This  We can however assume that some experiences are more valuable than others (most experiences in this environment are not that probably not that important). With prioritized experience replay, the sampling distribution is proportional (or at least a function) of some measure of importance. 
+4.  **Alternative model architectures** Other architectures can be tested (e.g. A3C, policy gradients) that might improve performance
