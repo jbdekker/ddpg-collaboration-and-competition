@@ -1,7 +1,5 @@
 # Collaboration and Competition using DDPG - Project Report
 
-### Implementation
-
 ## The Environment
 
 This project is built around the [Tennis](https://github.com/Unity-Technologies/ml-agents/blob/master/docs/Learning-Environment-Examples.md#tennis) environment.
